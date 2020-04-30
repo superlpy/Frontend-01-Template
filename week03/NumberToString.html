@@ -1,0 +1,25 @@
+<script>
+    function convertNumberToString(number,x=10){
+        var integer=Math.floor(number);
+        var fraction=number-integer;
+    
+        var string='';
+        while(integer>0){
+            string = String(integer % x) + string;
+            integer = Math.floor (integer/x);
+
+        }
+
+        if(fraction>0){
+            string+='.';
+        }
+
+        while(fraction>0){
+            var integer=Math.floor(fraction*x);
+            string+=integer;
+            fraction=fraction*x-integer;
+        }
+         return string;
+    }
+    convertNumberToString(100,2);   
+</script>
