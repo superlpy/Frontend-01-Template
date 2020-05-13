@@ -1,6 +1,5 @@
 # 每周总结可以写在这里
 
-##### 1.
 
 ![image-20200513184517777](C:\Users\dell\AppData\Roaming\Typora\typora-user-images\image-20200513184517777.png)
 
