@@ -17,16 +17,115 @@ let currentTextNode = null;
 let rules = [] ;
 function addCSSRules(text){
     var ast = css.parse(text);
-    console.log(JSON.stringify(ast, null, "   "));
+   // console.log(JSON.stringify(ast, null, "   "));
     rules.push(...ast.stylesheet.rules);
     //用了比较性的特性，就是把数组展开当参数传进去
 }
 
+//加入match函数，在选择器拆分这一环节，看元素和选择器是否匹配（从内向外）
+function match(element,selector){
+    if(!selector || !element.attributes)
+        return false;
+    
+
+        // attributes不是用kv存储的，它是使用数组存储的
+        // 所以我们要把他过滤出来，使用filter，
+    if(selector.charAt(0)  == "#"){
+        var attr = element.attributes.filter(attr => attr.name === "id" )[0];
+        if(attr && attr.value === selector.replace("#", ''))
+            return true;
+    }else if(selector.charAt(0) == '.'){
+        var attr = element.attributes.filter(attr => attr.name === 'class')[0];
+        if(attr && attr.value === selector.replace('.',''))
+            return true;
+    }else {
+        if(element.tagName  === selector){
+            return true;
+        }
+    }
+    return false;
+}
+
+//四元组
+function specificity(selector){
+    var p = [0,0,0,0];
+    var selectorParts = selector.split(" ");
+    for(var part of selectorParts){
+        if(part.charAt(0) == "#"){
+            p[1] += 1;
+        } else if(part.charAt[0] == "."){
+            p[2] += 1;
+        } else {
+            p[3] += 1;
+        }
+    }
+    return p;
+}
+
+//如果属性发生冲突的话，就compare
+function compare(sp1,sp2){
+    if(sp1[0] - sp2[0])
+        return sp1[0] - sp2[0];
+    if(sp1[1] - sp2[1])
+        return sp1[1] - sp2[1];
+    if(sp1[2] - sp2[2])
+        return sp1[2] - sp2[2];
+
+    return sp1[3] - sp2[3];
+
+}
+
 //computeCSS
 function computeCSS(element){
-    console.log(rules);
-    console.log("compute CSS for Element",element);
-}
+    // console.log(rules);
+    // console.log("compute CSS for Element",element);
+    var elements = stack.slice().reverse();
+    if(!element.computedStyle)
+        element.computedStyle = {};
+        //给元素添加computedStyle属性
+
+    for(let rule of rules){
+        var selectorParts = rule.selectors[0].split(" ").reverse();
+
+        if(!match(element,selectorParts[0]))//如果当前元素不匹配就退出
+            continue;
+        
+        let matched = false;
+
+        var j = 1;
+        for( var i=0; i < elements.length; i++){
+            if(match(elements[i], selectorParts[j])) {
+                j++;  
+            }
+        }
+        //元素和选择器都可以匹配上
+            if(j >= selectorParts.length)
+                matched = true;
+            
+            if(matched){
+                var sp = specificity(rule.selectors[0]);
+                //如果匹配到，我们要加入，把属性加入到element，也就是生成computedCSS
+                var computedStyle = element.computedStyle;
+                for(var declaration of rule.declarations) {
+                    if(!computedStyle[declaration.property])
+                        computedStyle[declaration.property] = {};
+                        //算式左部不需要 .value也可以，可以直接存储进computedStyle,
+                        //但是在后面我们要涉及到优先级的问题,所以把它存进对象的属性里
+                    
+
+                    if(!computedStyle[declaration.property].specificity){
+                        computedStyle[declaration.property].value = declaration.value;
+                        computedStyle[declaration.property].specificity = sp;
+                    }else if(compare(computedStyle[declaration.property].specificity, sp)<0){
+                        computedStyle[declaration.property].value = declaration.value;
+                        computedStyle[declaration.property].specificity = sp;
+                    }
+                    
+                    }  
+                    // console.log(element.computedStyle); 
+            }
+        }
+     }
 
 function emit(token){
     // if(token.type ==="text")
@@ -55,7 +154,7 @@ function emit(token){
 
 
             top.children.push(element);
-           // element.parent = top;
+            element.parent = top;//传入父元素
 
             if(! token.isSelfClosing)
               stack.push(element);

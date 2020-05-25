@@ -227,6 +227,7 @@ class TrunkedBodyParser{//body部分一定是以0作为结束的
         }
         this.current = this.WAITING_LENGTH_LINE_END;
       }else{
+        //采用十六进制
         this.length *= 16;
         this.length += parseInt(char,16);
       }
@@ -240,7 +241,8 @@ class TrunkedBodyParser{//body部分一定是以0作为结束的
 
     else if(this.current === this.READING_TRUNK){
       this.content.push(char);
-      this.length--;
+      // 由于使用的是UTF8的编码方式，所以如果使用中文或者超过一个字节的字符，这里的长度会统计失败
+      this.length -= getUTF8Length(char);
       if(this.length === 0){
         this.current = this.WAITING_NEW_LINE;
       }
@@ -261,6 +263,11 @@ class TrunkedBodyParser{//body部分一定是以0作为结束的
   }
 }
 
+//mosiya
+function getUTF8Length(char){
+  let length = char.codePointAt().toString(2).length;
+  return length <= 7 ? 1: Math.ceil((length - 1) / 5);
+}
 
   void async function(){
     //API风格
@@ -280,8 +287,11 @@ class TrunkedBodyParser{//body部分一定是以0作为结束的
      let response = await request.send();
 
      //body完全拿到之后再传给parser,这是在HTML-parser环节加的
-     let dom = parser.parseHTML(response.body);
-  //console.log(response);
+     let dom = parser.parseHTML(response.body) ;
+    //  console.log(response);
+    
+     console.log(dom);
+    
   }();
 
 /*
