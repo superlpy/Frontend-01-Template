@@ -154,7 +154,7 @@ function emit(token){
             //在元素被创建，并且tagName和属性已经设置了的时候才进行computeCSS
 
             computeCSS(element);
-            layout(element);
+            // layout(element);
 
 
             top.children.push(element);
@@ -174,9 +174,10 @@ function emit(token){
                 }
                 //在endTag的位置添加layout,因为要取到它的子元素才可以进行layout
                 // 我们用了简便的方法，实际浏览器是根据属性来判断它是处于哪个阶段的
+                layout(top);
                 stack.pop();
             }
-            layout(top);
+            
             currentTextNode = null;
         }else if(token.type == "text"){
             if(currentTextNode == null){

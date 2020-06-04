@@ -101,7 +101,7 @@ class ResponseParser{
 
   //结束bodyParser之后再来进行这一步
   get isFinished(){
-    return  this.bodyParser &&this.bodyParser.isFinished;
+    return  this.bodyParser && this.bodyParser.isFinished;
   }
 
   //写正则
@@ -296,7 +296,7 @@ function getUTF8Length(char){
      let viewport = images(800,600);
 
      //往viewport上面画
-    render(viewport, dom.chirdren[0].children[3].children[1].children[1]);
+    render(viewport, dom);
     
      viewport.save("viewport.jpg");
     // console.log(JSON.stringify(dom, null ,"   "));

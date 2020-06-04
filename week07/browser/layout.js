@@ -42,7 +42,7 @@ function layout(element){
 
     ['width', 'height'].forEach(size => {
         if(style[size] === 'auto'  || style[size] === '') {
-            style[size] == null;//自动撑开
+            style[size] = null;//自动撑开
         }
     })
 
@@ -51,7 +51,7 @@ function layout(element){
         style.flexDirection = 'row';
     if(!style.alignItems || style.alignItems === 'auto')
         style.alignItems = 'stretch';
-    if(!style.justifyContent || style.justifyContent == 'auto')
+    if(!style.justifyContent || style.justifyContent === 'auto')
         style.justifyContent = 'flex-start';
     if(!style.flexWrap || style.flexWrap === 'auto')
         style.flexWrap = 'nowrap';
@@ -189,7 +189,7 @@ for(var i = 0; i < items.length; i++) {
     var scale = style[mainSize] / (style[mainSize] - mainSpace);
     var currentMain  = mainBase;
     for (var i=0; i < items.length; i++){
-        var item = item[i];
+        var item = items[i];
         var itemStyle = getStyle(item);
 
         if(itemStyle.flex) {
@@ -297,7 +297,7 @@ if(style.alignContent === 'flex-end') {
     crossBase += crossSign * crossSpace;
     step = 0;
 }
-if(style.alignContent == 'center') {
+if(style.alignContent === 'center') {
     crossBase += crossSign * crossSpace / 2;
     step = 0;
 }
@@ -305,7 +305,7 @@ if(style.alignContent === 'space-between') {
     crossBase += 0;
     step = crossSpace / (flexLines.length - 1);
 }
-if(style.alignContent == 'space-around') {
+if(style.alignContent === 'space-around') {
     step = crossSpace / (flexLines.length);
     crossBase += crossSign * step / 2;
 }
@@ -315,9 +315,7 @@ if(style.alignContent === 'stretch') {
 }
 
 flexLines.forEach(function (items){
-    var lineCrossSize  = style.alignContent === 'stretch' ?
-        items.crossSpace + crossSpace / flexLines.length :
-        items.crossSpace;
+    var lineCrossSize  = style.alignContent === 'stretch' ?items.crossSpace + crossSpace / flexLines.length : items.crossSpace;
     for(var i = 0; i < items.length; i++) {
         var item = items[i];
         var itemStyle = getStyle(item);
@@ -345,8 +343,7 @@ flexLines.forEach(function (items){
 
         if(align === 'stretch') {
             itemStyle[crossStart] = crossBase;
-            itemStyle[crossEnd] = crossBase + crossSign * ((itemStyle[crossSize] !== null && itemStyle[crossSize] !== (void 0))?
-            itemStyle[crossSize] : lineCrossSize);
+            itemStyle[crossEnd] = crossBase + crossSign * ((itemStyle[crossSize] !== null && itemStyle[crossSize] !== (void 0))? itemStyle[crossSize] : lineCrossSize);
 
             itemStyle[crossSize] = crossSign * (itemStyle[crossEnd] - itemStyle[crossStart]);
         }
