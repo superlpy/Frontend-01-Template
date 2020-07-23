@@ -1,0 +1,51 @@
+<script>
+
+    // let handlers = [];
+    let handlers = new Map();
+    let object = {
+        a: 1,
+        b: 2
+    }
+    function reactive(obj){
+        //object包装成proxy对象
+        return new Proxy(obj, {
+            //get依赖收集
+            get(obj, prop){
+                console.log(obj,prop);
+                return obj[prop];
+            },
+            set(obj, prop, val){
+                //理论来说，有console.log,可调用回调，执行effect
+                // console.log(obj,prop,val);
+                obj[prop] = val;//注意handler执行的时机，赋值之后
+                //但是handler在后面才被传进去，想在这里调用就在前面定义一个数组
+                for(let handler of handlers)
+                    handler();
+                return obj[prop];
+            }
+        })
+    }
+
+    //参数是函数handler
+    function effect(handler){
+        // console.log(handler);
+        //dummy和object有关系就只需要调用handler()
+         handler();//收集依赖关系
+         handlers.push(handler);//handler push进handlers里面
+    }
+
+    let dummy;
+
+    let proxy = reactive(object);
+
+    //调用effect
+    //dummy和object开始没关系
+    effect(() => dummy = proxy.a);//看起来像函数式的API
+    console.log(dummy);
+    proxy.a = 2;
+    console.log(dummy);
+
+    //这个代码就会存在一点问题，比如每次都重复执行handlers，我们需要进行改进
+    //进行依赖收集，handlers使用Map
+
+</script>

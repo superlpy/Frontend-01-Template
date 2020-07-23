@@ -1,0 +1,112 @@
+<!-- 双向绑定 -->
+    <input id="r" type = range min=0 max=255/>
+    <input id="g" type = range min=0 max=255/>
+    <input id="b" type = range min=0 max=255/>
+
+    <div id="color" style = "width:100px; height: 100px;"></div>
+
+<script>
+
+    // let handlers = [];
+    let handlers = new Map();
+
+    //设定全局的数组，或者是reactive和effect可以同时访问到的
+    let usedReactivities = [];
+    let reactivities = new Map();
+
+    let object = {
+        a:{x:3},
+        b: 2
+    }
+    function reactive(obj){
+        if(reactivities.has(obj)){
+            return reactivities.get(obj);
+        }
+
+         //object包装成proxy对象     
+      let proxy =  new Proxy(obj, {
+            //get依赖收集
+            get(obj, prop){
+                usedReactivities.push([obj,prop]);
+                if(typeof obj[prop] === 'object'){
+                    return reactive(obj[prop]);  
+                    //返回一个新的对象
+                }
+                return obj[prop];
+            },
+            set(obj, prop, val){
+                //理论来说，有console.log,可调用回调，执行effect
+                obj[prop] = val;//注意handler执行的时机，赋值之后
+
+                //获得handler
+                if(handlers.get(obj))
+                    if(handlers.get(obj).get(prop))
+                        for(let handler of handlers.get(obj).get(prop))
+                            handler();
+                return obj[prop];
+            }
+        })
+        //把它存一下，那么他每次return 的都是同一个对象，不会发生重复包装的事情
+
+        reactivities.set(obj, proxy);
+        reactivities.set(proxy, proxy);
+
+
+        return proxy;
+    }
+
+    //参数是函数handler,handler就是一个回调函数
+    function effect(handler){
+
+        //调用handler之前清空
+        usedReactivities = [];
+        //dummy和object有关系就只需要调用handler()
+         handler();//收集依赖关系
+         console.log(usedReactivities);
+
+         //根据收集到的依赖保存handler
+         for(let usedReactivity of usedReactivities){
+             let [obj, prop] = usedReactivity;
+             console.log([obj, prop]);//得到所依赖的变量列表
+
+             //它是一个两层的，obj prop
+             if(!handlers.has(obj)) {
+                 handlers.set(obj, new Map());
+             }
+
+             if(!handlers.get(obj).has(prop)) {
+                 handlers.get(obj).set(prop,[]);//使用数组或者 set
+             }
+
+             handlers.get(obj).get(prop).push(handler);
+         }
+    }
+
+    
+    let p = reactive({r:100, g:100, b:100});
+
+    effect(() =>{
+        document.getElementById('r').value = p.r;
+    });
+    effect(() =>{
+        document.getElementById('g').value = p.g;
+    });
+    effect(() =>{
+        document.getElementById('b').value = p.b;
+    });
+
+    document.getElementById('r').addEventListener('input', event =>{
+        p.r = event.target.value;
+    })
+    document.getElementById('g').addEventListener('input', event =>{
+        p.g = event.target.value;
+    })
+    document.getElementById('b').addEventListener('input', event =>{
+        p.b = event.target.value;
+    })
+
+
+    effect(() => {
+        document.getElementById('color').style.backgroundColor = `rgb(${p.r},${p.g},${p.b})`;
+    })
+</script>

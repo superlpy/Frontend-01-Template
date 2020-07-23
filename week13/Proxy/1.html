@@ -1,0 +1,19 @@
+<script>
+    let object = {
+        a: 1,
+        b: 2
+    }
+
+
+    //把object包装成为一个proxy事件,和object相比提供了各种各样的Hook属性
+    let proxy = new Proxy(object, {
+        get(obj, prop){
+            console.log(obj,prop);
+            return obj[prop];
+        },
+        defineProperty(object, prop, desc){
+            console.log(arguments);
+            return Object.defineProperty(object, prop, desc);
+        }
+    })
+</script>

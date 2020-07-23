@@ -1,0 +1,40 @@
+class MyComponent extends Component{
+    costructor(config){
+        this,state = {
+            i: 1
+        }
+    }
+
+    get prop1(){
+
+    }
+
+    set prop1(){
+
+    }
+
+    setAttribute(attr){
+
+    }
+
+    getAttribute(attr, value){
+
+    }
+
+<!-- 生命周期，从组件外部调入，遵循一些规则 -->
+    mounter(){
+
+    }
+    render(){
+
+    }
+
+    get children(){}
+    set children(){}
+}
+
+<!--  property 和 attribute 是否保持一致-->
+myComponent.attr1 = 33;
+<!-- myComponent.prop1 = 33 不一致-->
+
+<Mycomponent attr1='33'/>
