@@ -1,0 +1,49 @@
+<script>
+    var regexp =  /([0-9\.]+)|([ ]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)/g;
+
+    var dictionary = ['Number', 'Whitespace', 'LineTerminator', "+", "-", "*", "/"];
+
+    function* tokenize(source){
+        var result = null;
+        var lastIndex = 0;
+        do{
+
+            //匹配
+            lastIndex = regexp.lastIndex;
+            result = regexp.exec(source);
+
+            //判断匹配的结果
+
+            if(!result){
+                break;
+            }
+
+            
+            if(regexp.lastIndex - lastIndex > result[0].length)
+                throw new Error("Unexpected token \"" +
+                     source.slice(lastIndex, regexp.lastIndex - result[0].length) + "\"!");
+
+            //生成 token
+            let token = {
+                type: null,
+                value: null
+            }
+
+            for(var i = 0; i < dictionary.length; i++){
+                if(result[i + 1])
+                    token.type = (dictionary[i]);
+            }
+
+            token.value = (result[0]);
+
+            yield token;
+
+        }while(result);
+        
+        yield { type: "EOF"};
+    }
+
+    for(let token of tokenize("~1024 + 5 * 10")){
+       console.log(token);
+    }
+</script>
