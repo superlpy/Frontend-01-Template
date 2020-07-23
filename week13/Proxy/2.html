@@ -1,0 +1,23 @@
+<script>
+    let object = {
+        a: 1,
+        b: 2
+    }
+    function reactive(obj){
+        //object包装成proxy对象
+        return new Proxy(object, {
+            get(obj, prop){
+                console.log(obj,prop);
+                return obj[prop];
+            },
+            set(obj, prop, val){
+                //理论来说，有console.log,可调用回调，执行effect
+                console.log(obj,prop,val);
+                return obj[prop] = val;
+            }
+        })
+    }
+
+    let proxy = reactive(object);
+
+</script>
